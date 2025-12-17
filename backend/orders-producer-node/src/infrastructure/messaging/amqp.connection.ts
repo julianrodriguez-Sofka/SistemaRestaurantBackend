@@ -21,38 +21,46 @@ class RabbitMQConnection {
     return RabbitMQConnection.instance;
   }
 
-  async connect(): Promise<void> {
+  async connect(retries = 5, delay = 3000): Promise<void> {
     if (this.connection) return;
 
     const type = process.env.AMQP_CONNECTION_TYPE;
 
-    try {
-      if (type === "cloud") {
-        this.connection = await amqp.connect({
-          protocol: process.env.AMQP_CLOUD_PROTOCOL,
-          hostname: process.env.AMQP_CLOUD_HOST,
-          port: Number(process.env.AMQP_CLOUD_PORT),
-          username: process.env.AMQP_CLOUD_USER,
-          password: process.env.AMQP_CLOUD_PASS,
-          vhost: process.env.AMQP_CLOUD_VHOST,
-        });
-        console.log("🐇 Conexión CloudAMQP creada");
-      } else {
-        this.connection = await amqp.connect({
-          protocol: process.env.AMQP_LOCAL_PROTOCOL,
-          hostname: process.env.AMQP_LOCAL_HOST,
-          port: Number(process.env.AMQP_LOCAL_PORT) || undefined,
-          username: process.env.AMQP_LOCAL_USER,
-          password: process.env.AMQP_LOCAL_PASS,
-          locale: "en_US",
-          frameMax: 0,
-          heartbeat: 0,
-        });
-        console.log("🐇 Conexión Local AMQP creada");
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        if (type === "cloud") {
+          this.connection = await amqp.connect({
+            protocol: process.env.AMQP_CLOUD_PROTOCOL,
+            hostname: process.env.AMQP_CLOUD_HOST,
+            port: Number(process.env.AMQP_CLOUD_PORT),
+            username: process.env.AMQP_CLOUD_USER,
+            password: process.env.AMQP_CLOUD_PASS,
+            vhost: process.env.AMQP_CLOUD_VHOST,
+          });
+          console.log("🐇 Conexión CloudAMQP creada");
+        } else {
+          this.connection = await amqp.connect({
+            protocol: process.env.AMQP_LOCAL_PROTOCOL,
+            hostname: process.env.AMQP_LOCAL_HOST,
+            port: Number(process.env.AMQP_LOCAL_PORT) || undefined,
+            username: process.env.AMQP_LOCAL_USER,
+            password: process.env.AMQP_LOCAL_PASS,
+            locale: "en_US",
+            frameMax: 0,
+            heartbeat: 0,
+          });
+          console.log("🐇 Conexión Local AMQP creada");
+        }
+        return; // Success, exit retry loop
+      } catch (err) {
+        console.error(`❌ Error creando conexión AMQP (intento ${attempt}/${retries}):`, err);
+        if (attempt < retries) {
+          console.log(`⏳ Reintentando en ${delay/1000} segundos...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw err;
+        }
       }
-    } catch (err) {
-      console.error("❌ Error creando conexión AMQP:", err);
-      throw err;
     }
   }
 

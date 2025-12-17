@@ -13,12 +13,12 @@ docker-compose up -d
 Write-Host "⏳ Esperando a que los servicios del backend estén listos (30 segundos)..." -ForegroundColor Yellow
 Start-Sleep -Seconds 30
 
-# Levantar frontend
+# Levantar frontend (en carpeta hermana)
 Write-Host "🎨 Levantando aplicaciones frontend..." -ForegroundColor Cyan
-Set-Location ../frontend
+Set-Location ..\..\SistemaRestaurantFronted\frontend
 docker-compose up -d
 
-Set-Location ..
+Set-Location ..\..\SistemaRestaurantBackend
 
 Write-Host ""
 Write-Host "✅ Sistema iniciado correctamente!" -ForegroundColor Green
