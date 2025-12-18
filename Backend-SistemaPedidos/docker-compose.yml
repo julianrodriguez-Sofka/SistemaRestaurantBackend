@@ -1,0 +1,118 @@
+services:
+  # Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_ERLANG_COOKIE=SWQOKODSQALRPCLNMEQG
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - sistema-pedidos-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - sistema-pedidos-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Microservicio de validación de pedidos (Python/FastAPI)
+  python-ms:
+    build:
+      context: ./orders-producer-python
+      dockerfile: Dockerfile
+    container_name: python-ms
+    env_file:
+      - ./orders-producer-python/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - sistema-pedidos-network
+    restart: unless-stopped
+
+  # Microservicio de procesamiento de pedidos (Node.js)
+  node-ms:
+    build:
+      context: ./orders-producer-node
+      dockerfile: Dockerfile
+    container_name: node-ms
+    env_file:
+      - ./orders-producer-node/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+      - "4000:4000"
+    networks:
+      - sistema-pedidos-network
+    restart: unless-stopped
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    env_file:
+      - ./api-gateway/.env
+    depends_on:
+      - python-ms
+      - node-ms
+    ports:
+      - "3000:3000"
+    networks:
+      - sistema-pedidos-network
+    restart: unless-stopped
+
+  # Servicio de administración (usuarios, productos, mesas)
+  admin-service:
+    build:
+      context: ./admin-service
+      dockerfile: Dockerfile
+    container_name: admin-service
+    env_file:
+      - ./admin-service/.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "4001:4000"
+    networks:
+      - sistema-pedidos-network
+    restart: unless-stopped
+
+networks:
+  sistema-pedidos-network:
+    driver: bridge
+    name: sistema-pedidos-network
+
+volumes:
+  mongo-data:
+  rabbitmq-data:
