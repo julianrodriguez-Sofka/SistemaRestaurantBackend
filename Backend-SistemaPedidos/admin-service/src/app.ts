@@ -1,4 +1,5 @@
 // ...existing code...
+// SonarQube test: cambio menor para ver interacción en PR
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
