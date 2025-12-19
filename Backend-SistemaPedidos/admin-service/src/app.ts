@@ -1,5 +1,11 @@
 // ...existing code...
 // SonarQube test: cambio menor para ver interacción en PR
+
+// Código para provocar error de calidad
+function unusedFunction() {
+  let a = 1;
+  // variable sin uso
+}
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
