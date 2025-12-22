@@ -8,8 +8,6 @@ on:
       - develop
 
 jobs:
-        - name: Copy coverage to root
-          run: mkdir -p coverage && cp admin-service/coverage/lcov.info coverage/lcov.info
   sonar:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
