@@ -21,11 +21,6 @@ function duplicatedCode2() {
   return z;
 }
 
-// Vulnerabilidad: uso de eval
-function vulnerableEval(input: string) {
-  // SonarQube debe marcar esto como crítico
-  return eval(input);
-}
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
