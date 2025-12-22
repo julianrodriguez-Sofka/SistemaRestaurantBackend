@@ -1,4 +1,26 @@
 // ...existing code...
+// SonarQube test: cambio menor para ver interacción en PR
+
+// Código para provocar error de calidad
+function unusedFunction() {
+  // función vacía
+}
+
+// Código duplicado para prueba SonarQube
+function duplicatedCode() {
+  let x = 10;
+  let y = 20;
+  let z = x + y;
+  return z;
+}
+
+function duplicatedCode2() {
+  let x = 10;
+  let y = 20;
+  let z = x + y;
+  return z;
+}
+
 import express, { Application } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
