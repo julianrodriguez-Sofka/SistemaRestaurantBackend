@@ -27,6 +27,12 @@ jobs:
       - name: Run tests with coverage
         run: cd admin-service && npx jest --coverage --coverageReporters=lcov
 
+      - name: Copy coverage to root
+        run: mkdir -p coverage && cp admin-service/coverage/lcov.info coverage/lcov.info
+
+      - name: Fix coverage paths
+        run: sed -i 's|SF:src/|SF:admin-service/src/|g' coverage/lcov.info
+
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
