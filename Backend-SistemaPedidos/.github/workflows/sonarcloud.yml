@@ -9,7 +9,7 @@ on:
 
 jobs:
         - name: Copy coverage to root
-          run: cp admin-service/coverage/lcov.info coverage.lcov.info
+          run: mkdir -p coverage && cp admin-service/coverage/lcov.info coverage/lcov.info
   sonar:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
@@ -42,4 +42,4 @@ jobs:
             -Dsonar.pullrequest.base=${{ github.base_ref }} \
             -Dsonar.pullrequest.github.repository=${{ github.repository }} \
             -Dsonar.pullrequest.provider=GitHub \
-            -Dsonar.javascript.lcov.reportPaths=coverage.lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
