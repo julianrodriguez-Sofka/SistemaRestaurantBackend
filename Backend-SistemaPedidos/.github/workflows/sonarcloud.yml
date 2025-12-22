@@ -29,7 +29,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          cd admin-service
           npm install -g sonarqube-scanner
           sonar-scanner \
             -Dsonar.projectKey=SistemaRestaurantBackend \
@@ -40,7 +39,4 @@ jobs:
             -Dsonar.pullrequest.branch=${{ github.head_ref }} \
             -Dsonar.pullrequest.base=${{ github.base_ref }} \
             -Dsonar.pullrequest.github.repository=${{ github.repository }} \
-            -Dsonar.pullrequest.provider=GitHub \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-            -Dsonar.sources=src \
-            -Dsonar.tests=tests
+            -Dsonar.pullrequest.provider=GitHub
