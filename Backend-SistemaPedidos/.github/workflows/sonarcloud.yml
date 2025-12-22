@@ -35,6 +35,13 @@ jobs:
           sed -i 's|SF:tests\\|SF:admin-service/tests/|g' coverage/lcov.info
           sed -i 's|SF:tests/|SF:admin-service/tests/|g' coverage/lcov.info
 
+      - name: Debug coverage file
+        run: |
+          echo "=== Coverage file content (first 30 lines) ==="
+          head -30 coverage/lcov.info
+          echo "=== Checking if files exist ==="
+          ls -la admin-service/src/ || echo "src not found"
+
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
